@@ -1,0 +1,12 @@
+#docker-compose up --build //crea una imagen para el contenedor
+# docker-compose up --no-recreate //no crea el nuevo contenedor, solo levanta el ya existente
+#docker-compose start
+
+services:
+  api:
+    build: .
+    container_name: server_fastapi
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./app:/app/app
