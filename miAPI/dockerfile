@@ -1,0 +1,19 @@
+FROM python:1.12-slim
+
+#crear carpeta de trabajo
+WORKDIR /app
+
+#Copia de requerimientos
+COPY requirements.txt 
+
+#Instalalos
+RUN pip install --no-cache-dir -r requirements.txt
+
+#copiar el codigo del proyecto
+COPY ./app ./app
+
+#Exponer el puerto
+EXPOSE 5000
+
+#Comandos para ejecutar FASTAPI
+CMD  ["uvicorn","app.main:app", "--host","0.0.0.0","--port","5000","--reload"]
