@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  biblioteca-api:
+    build: .
+    container_name: biblioteca_digital_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    restart: unless-stopped

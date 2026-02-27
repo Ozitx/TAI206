@@ -1,0 +1,164 @@
+{
+  "info": {
+    "_postman_id": "fca84ca7-4914-429f-af8d-b975ec4e01fe",
+    "name": "Biblioteca Digital API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52677311",
+    "_collection_link": "https://go.postman.co/collection/52677311-fca84ca7-4914-429f-af8d-b975ec4e01fe?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Libros",
+      "item": [
+        {
+          "name": "Registrar libro",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"nombre\": \"Cien Años de Soledad\",\r\n    \"autor\": \"Gabriel García Márquez\",\r\n    \"anio_publicacion\": 1967,\r\n    \"paginas\": 471\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8000/libros",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "libros"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar libros",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/libros",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "libros"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar libro",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/libros/buscar?nombre=Cien",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "libros",
+                "buscar"
+              ],
+              "query": [
+                {
+                  "key": "nombre",
+                  "value": "Cien",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Prestamos",
+      "item": [
+        {
+          "name": "Registrar prestamos",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"libro_id\": \"83dd72b9-d4f1-41e3-a167-59cd457c8e04\",\r\n    \"nombre_usuario\": \"María López\",\r\n    \"correo_usuario\": \"maria.lopezgmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8000/prestamos",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "prestamos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Devolver libro",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/prestamos/a55d6664-c47b-44b6-852c-abb08fa7bbd3/devolver",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "prestamos",
+                "a55d6664-c47b-44b6-852c-abb08fa7bbd3",
+                "devolver"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar prestamo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/prestamos/a55d6664-c47b-44b6-852c-abb08fa7bbd3",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "prestamos",
+                "a55d6664-c47b-44b6-852c-abb08fa7bbd3"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
