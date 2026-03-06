@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Usuarios</title>
+    <style>
+        body { font-family: Arial; padding: 20px;}
+        input { margin: 5px;}
+        table { border-collapse: collapse; width: 60%; margin-top: 20px;}
+        th, td { border: 1px solid black; padding: 8px; text-align: center;}
+        th { background-color: #f2f2f2;}
+        button { padding: 5px 10px;}
+    </style>
+</head>
+<body>
+    <h2>Agregar usuario</h2>
+    <form action="/agregar" method="POST">
+        ID: <input type="number" name="id" required>
+        Nombre: <input type="text" name="nombre" required>
+        Edad: <input type="number" name="edad" required>
+        <button type="submit">Agregar</button>
+    </form>
+
+    <h2>Lista de usuarios</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Edad</th>
+            <th>Eliminar</th>
+        </tr>
+        {% for u in usuarios %}
+        <tr>
+            <td>{{ u.id }}</td>
+            <td> {{ u.nombre }}</td>
+            <td>{{ u.edad }}</td>
+            <td>
+                <a href="/eliminar/{{ u.id }}">
+                    <button>Eliminar</button>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+</body>
+</html>

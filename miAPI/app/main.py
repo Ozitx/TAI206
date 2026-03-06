@@ -2,10 +2,12 @@
 #uvicorn main:app --reload
 #importaciones
 
-from fastapi import FastAPI, status, HTTPException
+from fastapi import FastAPI, status, HTTPException, Depends
 import asyncio
 from typing import Optional
 from pydantic import BaseModel, Field
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+import secrets
 
 #Inicialización
 app= FastAPI( title='My first API', description='Cynthia Resendiz Ramos', version='1.0')
@@ -26,6 +28,23 @@ class UsuarioBase(BaseModel):
     id: int = Field(...,gt=0, description="Identificador de usuario", example="1")
     nombre: str = Field(..., min_length=3, max_length=50, description="Nombre del usuario")
     edad: int = Field(..., ge=0, le=120, description="Edad valida entre 0 y 120")
+    
+#**************************************
+#Seguridad con HTTP Basic
+#**************************************
+security= HTTPBasic()
+    
+def verificar_Peticion(credentials: HTTPBasicCredentials=Depends(security)):
+    usuarioAuth= secrets.compare_digest(credentials.username,"admin")
+    contraAuth= secrets.compare_digest(credentials.password,"123456789")
+    
+    if not(usuarioAuth and contraAuth):
+        raise HTTPException(
+            status_code= status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciales no validos"
+        )
+        
+    return credentials.username
 
 
 #Endpoints
@@ -93,12 +112,12 @@ async def actualizar_usuarios(id: int, usuario_actualizado: dict):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
 
 @app.delete("/v1/usuarios/{id}", tags=['CRUD Usuarios'])
-async def eliminar_usuarios(id: int):
+async def eliminar_usuarios(id: int, usuarioAuth: str= Depends(verificar_Peticion)):
     for usr in usuarios:
         if usr["id"] == id:
             usuarios.remove(usr)
             return{
-                "mensaje": "Usuario eliminado",
+                "mensaje": f"Usuario eliminado por {usuarioAuth}",
                 "datos": usr
             }
     raise HTTPException(status_code=404, detail="Usuario no encontrado")
