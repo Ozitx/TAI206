@@ -5,7 +5,7 @@
 services:
   api:
     build: .
-    container_name: server_fastapi
+    container_name: servidor_fastapi
     ports:
       - "5002:5000"
     volumes:

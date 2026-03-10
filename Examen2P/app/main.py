@@ -1,3 +1,4 @@
+#uvicorn main:app --reload
 from fastapi import FastAPI, status, HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -27,7 +28,7 @@ oauth2_scheme= OAuth2PasswordBearer(tokenUrl="token")
 fake_users_bd = {
     "admin": {
         "username": "admin",
-        "hashed_password": pwd_context.hash("123456789")
+        "hashed_password": pwd_context.hash("1234")
     }
 }
 
@@ -35,11 +36,12 @@ fake_users_bd = {
 class UsuarioBase(BaseModel):
     id: int = Field(...,gt=0, description="Identificador de usuario", example="1")
     nombre: str = Field(..., min_length=5, max_length=50, description="Nombre del usuario")
+    edad: int = Field(..., ge=0, le=120, description="Edad valida entre 0 a 120 años")
     
 class cita(BaseModel):
-    fecha: 
+    fecha: datetime = Field(..., )
     motivo: str = Field(..., min_length= 5, max_digits=100, description="Motivo de la consulta")
-    confirmacion: bool = Field(..., False, description="Confirmacion de cita")
+    confirmacion: bool = Field(..., default= False, description="Confirmacion de cita")
     
 class Token(BaseModel):
     access_token: str
@@ -85,7 +87,7 @@ def verificar_token(token : str = Depends(oauth2_scheme)) -> str:
     except JWTError:
         raise credentrials_exception
 
-#pacientes
+#BD Ficticaia
 usuarios=[
     {"id":1,"nombre":"cynthia","edad":"20"},
     {"id":2,"nombre":"Eduardo","edad":"20"},
@@ -110,9 +112,42 @@ async def login(from_data: OAuth2PasswordRequestForm = Depends()):
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
+
+@app.get ("/v1/usuarios/", tags=['CRUD Usuarios'])
+async def consultausuario():
+    return{
+        "status": "200",
+        "total": len(usuarios),
+        "data":usuarios
+    }
+    
+@app.post("/v1/usuarios/", tags=['CRUD Usuarios'])
+async def agregar_usuarios(usuario:UsuarioBase):
+    for usr in usuarios:
+        if usr["id"] == usuario.id:
+            raise HTTPException(status_code=400, detail="El id ya existe")
+    usuarios.append(usuario)
+    return{
+        "Mensaje": "Usuario agregado",
+        "datos":usuario,
+        "status":"200"
+    }
+    
 @app.get("/", tags=['Inicio'])
 async def inicio():
     return {"mensaje": "funciona"}
 
 #Endpoints protegidos con JWT
-@app.get("/")
+@app.get("/v1/usuarios/{id}", tags=['CRUD usuarios'])
+async def eliminar_citas(
+    id: int,
+    current_user: str = Depends(verificar_token)
+    ):
+    for usr in usuarios:
+        if usr["id"] == id:
+            usuarios.remove(usr)
+            return{
+                "mensaje": f"Cita eliminada por {current_user}",
+                "datos": usr
+            }
+    raise HTTPException(status_code=404, detail="Usuario no encontrado") 
