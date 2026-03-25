@@ -14,6 +14,7 @@ from app.data.usuario import Usuario as usuarioDB
 
 router = APIRouter(prefix="/v1/usuarios", tags=["CRUD HTTP"])
 
+#____________________GET TODOS___________________________ 
 @router.get ("/")
 async def consultausuario(db:Session = Depends(get_db)):
     
@@ -24,7 +25,22 @@ async def consultausuario(db:Session = Depends(get_db)):
         "usuarios":consultausuarios
     }
     
-@router.post("/", status_code=status.HTTP_200_OK)
+#_____________________GET POR ID__________________________
+@router.get("/{id}", status_code=status.HTTP_200_OK)
+async def consulta_usuario_id(id: int, db: Session=Depends(get_db)):
+    usuario = db.query(usuarioDB).filter(usuarioDB.id == id).first()
+    if not usuario:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Usuario con id {id } no encontrado"
+        )
+    return {
+        "status": "200",
+        "usuario": usuario
+    }
+    
+#_____________________________POST________________________________________
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def agregar_usuarios(usuarioP:UsuarioBase, db:Session= Depends(get_db)):
     
     nuevoUsuario=usuarioDB(nombre= usuarioP.nombre,edad= usuarioP.edad)
@@ -36,27 +52,66 @@ async def agregar_usuarios(usuarioP:UsuarioBase, db:Session= Depends(get_db)):
     return{
         "Mensaje": "Usuario agregado",
         "datos":nuevoUsuario,
-        "status":"200"
+        "status":"201"
     }
-        
+       
+#_____________________________________PUT___________________________________________ 
 @router.put("/{id}", status_code=status.HTTP_200_OK)
-async def actualizar_usuarios(id: int, usuario_actualizado: dict):
-    for index, usr in enumerate(usuarios):
-        if usr["id"] == id:
-            usuarios[index] = usuario_actualizado
-            return{
-            "Mensaje": "Usuario actualizado",
-            "datos": usuario_actualizado
-            }
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
+async def actualizar_usuario(id: int, usuario_actualizado: UsuarioBase, db: Session = Depends(get_db)):
+    usuario = db.query(usuarioDB).filter(usuarioDB.id == id).first()
+    if not usuario:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Usuario con id {id} no encontrado"
+        )
+    usuario.nombre = usuario_actualizado.nombre
+    usuario.edad = usuario_actualizado.edad
+    db.commit()
+    db.refresh(usuario)
+    return{
+        "Mensaje": "Usuario actualizado",
+        "datos": usuario,
+        "status": "200"
+    }
 
+#__________________________PATCH________________________________________
+@router.patch("/{id}", status_code=status.HTTP_200_OK)
+async def actualizar_usuario_dos(id: int, campos: dict, db: Session = Depends(get_db)):
+    usuario = db.query(usuarioDB).filter(usuarioDB.id == id).first()
+    if not usuario:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Usuario con id {id} no encontrado"
+        )
+    campos_permitidos = {"nombre", "edad"}
+    for campo, valor in campos_items():
+        if campo not in campos_permitidos:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Campo '{campo}' no permitido"
+            )
+        setattr(usuario, campo, valor)
+    db.commit()
+    db.refresh(usuario)
+    return{
+        "Mensaje": "Usuario actualizado con PATCH",
+        "datos": usuario,
+        "status": "200"
+    }
+    
+#__________________________DELETE________________________________________
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
-async def eliminar_usuarios(id: int, usuarioAuth: str= Depends(verificar_Peticion)):
-    for usr in usuarios:
-        if usr["id"] == id:
-            usuarios.remove(usr)
-            return{
-                "mensaje": f"Usuario eliminado por {usuarioAuth}",
-                "datos": usr
-            }
-    raise HTTPException(status_code=404, detail="Usuario no encontrado")
+async def eliminar_usuarios(id: int, db: Session = Depends(get_db), usuarioAuth: str = Depends(verificar_Peticion)):
+    usuario = db.query(usuarioDB).filter(usuarioDB.id == id).first()
+    if not usuario:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Usuario con id {id} no encontrado"
+        )
+    db.delete(usuario)
+    db.commit()
+    return{
+        "Mensaje": f"Usuario eliminado por {usuarioAuth}",
+        "datos": {"id": usuario.id, "nombre": usuario.nombre, "edad": usuario.edad},
+        "status": "200"
+    }
